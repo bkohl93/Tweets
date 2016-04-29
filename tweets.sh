@@ -19,6 +19,7 @@ echo "5. See the top 10 used words"
 echo "6. See the top 10 negative words"
 echo "7. See the top 10 positive words"
 echo "8. Get new tweets"
+echo "9. View the logfile"
 echo "or press 0 to exit"
 read option
 
@@ -32,18 +33,45 @@ case $option in
         read exclude
         echo $exclude >> excludingWords.txt
         echo "$exclude succesfully added."
+        exit
         ;;
     2 )
         echo "Enter word to add to add to positiveWords.txt"
         read positive
-        echo $exclude >> positiveWords.txt
+        echo $positive >> positiveWords.txt
         echo "$positive succesfully added."
+        exit
         ;;
     3 )
         echo "Enter word to add to add to negativeWords.txt"
         read negative
-        echo $exclude >> negativeWords.txt
+        echo $negative >> negativeWords.txt
         echo "$negative succesfully added."
+        exit
+        ;;
+    4 )
+        #TODO
+        echo "Functionality not implemented yet."
+        echo "Exiting..."
+        exit
+        ;;
+    5 )
+        #TODO
+        echo "Functionality not implemented yet."
+        echo "Exiting..."
+        exit
+        ;;
+    6 )
+        #TODO
+        echo "Functionality not implemented yet."
+        echo "Exiting..."
+        exit
+        ;;
+    7 )
+        #TODO
+        echo "Functionality not implemented yet."
+        echo "Exiting..."
+        exit
         ;;
     8 )
         #get user input
@@ -55,6 +83,10 @@ case $option in
         echo "5.  Hobbies"
         echo "or press 0 to exit"
         read category
+        ;;
+    9 )
+        cat logfile.txt
+        exit
         ;;
     * )
         echo "Invalid input, exiting."
@@ -122,73 +154,71 @@ case $category in
         ;;
 esac
 
-if ($category) then
+read cmd
+url="https://twitter.com/i/streams/stream/$cmd"
 
-    read cmd
-    url="https://twitter.com/i/streams/stream/$cmd"
+currently=`date +"%m-%d-%Y %T"`
+echo "Current date is $currently"
 
-    currently=`date +"%m-%d-%Y %T"`
-    echo "Current date is $currently"
+#get html from twitter page
+wget -O twitter.html ${url}
 
-    #get html from twitter page
-    wget -O twitter.html ${url}
+#dump basic outline and text to file
+lynx --dump twitter.html > twitter.txt
 
-    #dump basic outline and text to file
-    lynx --dump twitter.html > twitter.txt
+#get lines after 'seconds ago'
+grep -i -A 4 'seconds ago' twitter.txt > output.txt
+grep -i -A 4 'minutes ago' twitter.txt >> output.txt
+grep -i -A 4 'hours ago' twitter.txt >> output.txt
 
-    #get lines after 'seconds ago'
-    grep -i -A 4 'seconds ago' twitter.txt > output.txt
-    grep -i -A 4 'minutes ago' twitter.txt >> output.txt
-    grep -i -A 4 'hours ago' twitter.txt >> output.txt
+#remove unnecessary text
+sed -i.txt '/seconds ago/d' output.txt
+sed -i.txt '/minutes ago/d' output.txt
+sed -i.txt '/hours ago/d' output.txt
 
-    #remove unnecessary text
-    sed -i.txt '/seconds ago/d' output.txt
-    sed -i.txt '/minutes ago/d' output.txt
-    sed -i.txt '/hours ago/d' output.txt
+#replace symbols
+sed -i.txt 's/\[.*\]\[DEL: @ :DEL\] /@/g' output.txt
+sed -i.txt 's/\[.*\]\[DEL: # :DEL\] /#/g' output.txt
+sed -i.txt 's/\[.*\]\[DEL: @ :DEL\]/@/g' output.txt
+sed -i.txt 's/\[.*\]\[DEL: # :DEL\]/#/g' output.txt
+sed -i.txt 's/.\:.*Details//g' output.txt
+sed -i.txt 's/\[.*\]http.*//g' output.txt
+sed -i.txt 's/\[.*\]pic.*//g' output.txt
+sed -i.txt 's/\.//g' output.txt
+sed -i.txt 's/\://g' output.txt
+sed -i.txt 's/\!//g' output.txt
+sed -i.txt 's/\?//g' output.txt
+sed -i.txt 's/\"//g' output.txt
+sed -i.txt 's/\--//g' output.txt
+sed -i.txt 's/\,//g' output.txt
+sed -i.txt 's/[()]//g' output.txt
+sed -i.txt 's/\-/ /g' output.txt
+sed -i.txt 's/\// /g' output.txt
 
-    #replace symbols
-    sed -i.txt 's/\[.*\]\[DEL: @ :DEL\] /@/g' output.txt
-    sed -i.txt 's/\[.*\]\[DEL: # :DEL\] /#/g' output.txt
-    sed -i.txt 's/\[.*\]\[DEL: @ :DEL\]/@/g' output.txt
-    sed -i.txt 's/\[.*\]\[DEL: # :DEL\]/#/g' output.txt
-    sed -i.txt 's/.\:.*Details//g' output.txt
-    sed -i.txt 's/\[.*\]http.*//g' output.txt
-    sed -i.txt 's/\[.*\]pic.*//g' output.txt
-    sed -i.txt 's/\.//g' output.txt
-    sed -i.txt 's/\://g' output.txt
-    sed -i.txt 's/\!//g' output.txt
-    sed -i.txt 's/\?//g' output.txt
-    sed -i.txt 's/\"//g' output.txt
-    sed -i.txt 's/\--//g' output.txt
-    sed -i.txt 's/\,//g' output.txt
-    sed -i.txt 's/[()]//g' output.txt
-    sed -i.txt 's/\-/ /g' output.txt
-    sed -i.txt 's/\// /g' output.txt
+#get one word per line
+tr ' ' '\n' < output.txt > outputTemp1.txt
 
-    #get one word per line
-    tr ' ' '\n' < output.txt > outputTemp1.txt
+#remove empty lines
+sed '/^$/d' outputTemp1.txt > outputTemp2.txt
 
-    #remove empty lines
-    sed '/^$/d' outputTemp1.txt > outputTemp2.txt
+#remove any remnants
+sed -i.txt 's/\[.*//g' outputTemp2.txt
+sed -i.txt 's/\].*//g' outputTemp2.txt
 
-    #remove any remnants
-    sed -i.txt 's/\[.*//g' outputTemp2.txt
-    sed -i.txt 's/\].*//g' outputTemp2.txt
+#remove empty lines
+sed '/^$/d' outputTemp2.txt > outputTemp3.txt
 
-    #remove empty lines
-    sed '/^$/d' outputTemp2.txt > outputTemp3.txt
+#convert to lower case
+tr '[:upper:]' '[:lower:]' < outputTemp3.txt > outputTemp4.txt
 
-    #convert to lower case
-    tr '[:upper:]' '[:lower:]' < outputTemp3.txt > outputTemp4.txt
+#get the number of words in file
+numWords=$(wc -w < outputTemp4.txt)
 
-    #get the number of words in file
-    numWords=$(wc -w < outputTemp4.txt)
+#clear outputTemp5.txt
+echo > outputTemp5.txt
 
-    #clear outputTemp5.txt
-    echo > outputTemp5.txt
-
-    while [ $numWords -gt 0 ]
-    do
+while [ $numWords -gt 0 ]
+do
     #get the first word in a file
     word=$(head -n 1 outputTemp4.txt)
 
@@ -203,28 +233,31 @@ if ($category) then
     sed -i.txt '/^$/d' outputTemp4.txt
 
     numWords=$(wc -w < outputTemp4.txt)
-    done
+done
 
-    #numerically sort output
-    sort -nr outputTemp5.txt > outputTemp6.txt
+#numerically sort output
+sort -nr outputTemp5.txt > outputTemp6.txt
 
-    #get file size
-    size=$(stat -f%z output.txt)
 
-    #append to logfile.txt
-    printf "%20s %20s %10s %10s" "$currently" "$url" "output.txt" "$size" << logfile.txt
+#sort outputTemp6.txt excludingWords.txt|uniq -u
 
-    #remove temporary files
-    rm output.txt.txt
-    rm outputTemp1.txt
-    rm outputTemp2.txt
-    rm outputTemp2.txt.txt
-    rm outputTemp3.txt
-    rm outputTemp4.txt
-    rm outputTemp4.txt.txt
-    rm outputTemp5.txt
-    rm twitter.html
-    rm twitter.txt
-fi
+#get file size
+size=$(stat -f%z output.txt)
+
+#append to logfile.txt
+printf "%20s %20s %10s %10s" "$currently" "$url" "output.txt" "$size" >> logfile.txt
+
+#remove temporary files
+rm output.txt.txt
+rm outputTemp1.txt
+rm outputTemp2.txt
+rm outputTemp2.txt.txt
+rm outputTemp3.txt
+rm outputTemp4.txt
+rm outputTemp4.txt.txt
+rm outputTemp5.txt
+rm twitter.html
+rm twitter.txt
+
 
 

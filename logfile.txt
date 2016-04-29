@@ -1,3 +1,4 @@
 twitter messages capture log
-date		Location		File Name	file Size (kB)
--------------  ------------------------  -------------  ------------
+date		      Location		                      File Name   file Size (B)
+———————————————————— —————————————————————————————————————— ——————————  ————————————
+ 04-27-2016 18:02:46 https://twitter.com/i/streams/stream/1 output.txt       1629
